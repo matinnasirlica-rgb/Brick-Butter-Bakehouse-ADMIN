@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Brick & Butter Bakehouse</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:#1A1714; --butter:#C9A84C; --butter-light:#E8D9A8;
+      --cream:#F5F0E8; --warm:#FAF8F4; --stone:#8C7B6B; --soft:#D4C4B0;
+      --sw:240px; --green:#2E7D52; --red:#9B3A2A;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:#EDEAE4;color:var(--ink);}
+
+    /* LOGIN */
+    #ls{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);}
+    .lbox{background:var(--warm);width:380px;padding:48px 40px;text-align:center;}
+    .llogo{font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:-.01em;line-height:.9;}
+    .llogo .amp{color:var(--butter);}
+    .llogo .sub{font-size:11px;letter-spacing:.2em;display:block;margin-top:4px;color:var(--stone);}
+    .lsub{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin:14px 0 24px;}
+    .linput{width:100%;padding:13px 16px;border:1px solid var(--soft);background:var(--cream);font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:10px;}
+    .linput:focus{border-color:var(--butter);}
+    .lbtn{width:100%;padding:14px;background:var(--ink);color:var(--warm);border:none;font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+    .lbtn:hover{background:var(--butter);color:var(--ink);}
+    .lerr{margin-top:10px;font-size:12px;color:var(--red);display:none;}
+
+    /* SHELL */
+    #sh{display:none;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sb{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--ink);display:flex;flex-direction:column;z-index:50;overflow-y:auto;}
+    .sbb{padding:26px 22px 20px;border-bottom:1px solid rgba(255,255,255,.07);}
+    .sbn{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:-.01em;color:var(--warm);line-height:.9;}
+    .sbn .amp{color:var(--butter);}
+    .sbn .s{font-size:9px;letter-spacing:.2em;display:block;margin-top:3px;color:rgba(250,248,244,.4);}
+    .sbadge{margin-top:9px;display:inline-block;font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--butter);border:1px solid rgba(201,168,76,.4);padding:3px 8px;}
+    .sbst{margin-top:9px;font-size:10px;color:rgba(250,248,244,.35);display:flex;align-items:center;gap:5px;}
+    .dot{width:6px;height:6px;border-radius:50%;background:#555;}
+    .dot.on{background:#3ECF8E;}
+    .sbnav{padding:12px 0;flex:1;}
+    .nsl{padding:13px 22px 4px;font-size:9px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:rgba(250,248,244,.2);}
+    .ni{display:flex;align-items:center;gap:10px;padding:11px 22px;font-size:13px;font-weight:500;color:rgba(250,248,244,.5);cursor:pointer;transition:all .15s;border-left:3px solid transparent;user-select:none;}
+    .ni:hover{color:var(--warm);background:rgba(255,255,255,.04);}
+    .ni.active{color:var(--warm);border-left-color:var(--butter);background:rgba(201,168,76,.08);}
+    .ni .ico{font-size:15px;width:20px;flex-shrink:0;}
+    .sbbot{padding:14px 22px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:8px;}
+    .sbl{font-size:12px;color:rgba(250,248,244,.4);cursor:pointer;transition:color .15s;text-decoration:none;display:flex;align-items:center;gap:7px;}
+    .sbl:hover{color:var(--warm);}
+
+    /* MAIN */
+    .main{margin-left:var(--sw);padding:34px 42px;min-height:100vh;}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;}
+    .tl .ttl{font-size:20px;font-weight:700;letter-spacing:-.02em;}
+    .tl .tsub{font-size:13px;color:var(--stone);margin-top:2px;}
+    .tr{display:flex;gap:9px;align-items:center;}
+
+    /* BUTTONS */
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap;}
+    .bp{background:var(--ink);color:var(--warm);}
+    .bp:hover{background:var(--butter);color:var(--ink);}
+    .bs{background:var(--cream);color:var(--ink);border:1px solid var(--soft);}
+    .bs:hover{border-color:var(--ink);}
+    .bd{background:#FFF0EE;color:var(--red);border:1px solid #F5C8C2;}
+    .bd:hover{background:var(--red);color:#fff;}
+    .bg{background:#E8F5EF;color:var(--green);border:1px solid #B8DEC9;}
+    .bg:hover{background:var(--green);color:#fff;}
+    .bsm{padding:7px 12px;font-size:10px;}
+    .btn:disabled{opacity:.5;pointer-events:none;}
+
+    /* SECTIONS */
+    .sec{display:none;}
+    .sec.active{display:block;}
+
+    /* CARDS */
+    .card{background:var(--warm);padding:24px 28px;margin-bottom:16px;}
+    .ct{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--soft);display:flex;align-items:center;justify-content:space-between;}
+
+    /* FORMS */
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px 20px;}
+    .fg1{display:grid;grid-template-columns:1fr;gap:13px;}
+    .fg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+    .fg{display:flex;flex-direction:column;gap:5px;}
+    .fg.full{grid-column:1/-1;}
+    label{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);}
+    input,textarea,select{padding:10px 12px;border:1px solid var(--soft);background:var(--cream);font-family:inherit;font-size:14px;color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
+    input:focus,textarea:focus,select:focus{border-color:var(--butter);background:var(--warm);}
+    textarea{resize:vertical;min-height:74px;line-height:1.5;}
+    .fa{margin-top:18px;display:flex;align-items:center;gap:11px;}
+    .saved{font-size:12px;color:var(--green);display:none;}
+    .saved.show{display:flex;align-items:center;gap:5px;}
+
+    /* HOURS */
+    .hr{display:grid;grid-template-columns:110px 1fr 16px 1fr;gap:9px 11px;align-items:center;margin-bottom:11px;}
+    .hrd{font-size:13px;font-weight:600;}
+    .hrsp{text-align:center;color:var(--stone);font-size:12px;}
+
+    /* ── CATEGORY MANAGER ── */
+    .cat-manager{display:flex;flex-direction:column;gap:2px;margin-bottom:20px;}
+    .cat-row{
+      display:grid;
+      grid-template-columns:28px 1fr auto auto;
+      gap:10px;
+      align-items:center;
+      background:var(--warm);
+      padding:12px 16px;
+      transition:background .15s;
+      border:1px solid transparent;
+    }
+    .cat-row:hover{background:var(--cream);}
+    .cat-row.dragging{opacity:.4;border:1px dashed var(--soft);}
+    .cat-row.drag-over{border:1px dashed var(--butter);background:rgba(201,168,76,.06);}
+    .drag-handle{cursor:grab;color:var(--soft);font-size:16px;line-height:1;user-select:none;transition:color .15s;}
+    .cat-row:hover .drag-handle{color:var(--stone);}
+    .drag-handle:active{cursor:grabbing;}
+    .cat-label-wrap{display:flex;align-items:center;gap:10px;}
+    .cat-emoji-badge{font-size:18px;width:28px;text-align:center;}
+    .cat-name{font-size:14px;font-weight:600;}
+    .cat-name .cat-key{font-size:11px;font-weight:400;color:var(--stone);margin-left:6px;}
+    .cat-count{font-size:11px;color:var(--stone);padding:3px 10px;background:var(--cream);border:1px solid var(--soft);}
+    .cat-acts{display:flex;gap:6px;}
+    .no-cats{padding:32px;text-align:center;color:var(--stone);font-style:italic;background:var(--warm);}
+
+    /* ADD CAT FORM */
+    .add-cat-form{background:var(--cream);padding:18px 20px;border:1px dashed var(--soft);margin-bottom:4px;}
+    .add-cat-form .row{display:grid;grid-template-columns:80px 1fr 120px;gap:10px;align-items:end;}
+
+    /* MENU ITEMS */
+    .cat-tabs{display:flex;gap:3px;margin-bottom:20px;flex-wrap:wrap;}
+    .ctab{padding:8px 14px;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:var(--cream);border:1px solid var(--soft);color:var(--stone);cursor:pointer;transition:all .15s;}
+    .ctab:hover,.ctab.active{background:var(--ink);color:var(--warm);border-color:var(--ink);}
+    .ctab .cnt{opacity:.5;font-size:10px;margin-left:3px;}
+
+    .ilist{display:flex;flex-direction:column;gap:2px;}
+    .irow{display:grid;grid-template-columns:30px 1fr 108px 96px 130px;gap:10px;align-items:center;background:var(--warm);padding:12px 16px;transition:background .15s;}
+    .irow:hover{background:var(--cream);}
+    .inum{font-size:11px;color:var(--stone);font-style:italic;}
+    .iname{font-size:14px;font-weight:600;}
+    .iname .idesc{font-size:12px;font-weight:400;color:var(--stone);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;margin-top:1px;}
+    .itag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--butter);border:1px solid var(--butter);padding:2px 6px;}
+    .iprice{font-size:14px;font-weight:600;}
+    .iact{display:flex;gap:5px;justify-content:flex-end;}
+    .empty{padding:36px;text-align:center;color:var(--stone);font-style:italic;background:var(--warm);}
+
+    /* LOADING */
+    .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;}
+    .spin.dk{border-color:rgba(26,23,20,.2);border-top-color:var(--ink);}
+    @keyframes sp{to{transform:rotate(360deg);}}
+    .skel{background:linear-gradient(90deg,var(--cream) 25%,var(--soft) 50%,var(--cream) 75%);background-size:200% 100%;animation:sh 1.4s infinite;height:52px;margin-bottom:2px;}
+    @keyframes sh{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+    /* MODAL */
+    .ov{position:fixed;inset:0;background:rgba(26,23,20,.6);z-index:200;display:none;align-items:center;justify-content:center;}
+    .ov.open{display:flex;}
+    .modal{background:var(--warm);width:520px;max-width:95vw;max-height:92vh;overflow-y:auto;}
+    .mhd{padding:20px 24px 16px;border-bottom:1px solid var(--soft);display:flex;justify-content:space-between;align-items:center;}
+    .mhd h3{font-size:15px;font-weight:700;}
+    .mx{background:none;border:none;font-size:20px;cursor:pointer;color:var(--stone);line-height:1;padding:4px;}
+    .mx:hover{color:var(--ink);}
+    .mbody{padding:24px;}
+    .mft{padding:16px 24px;border-top:1px solid var(--soft);display:flex;gap:9px;justify-content:flex-end;}
+
+    /* CONFIRM */
+    .cov{position:fixed;inset:0;background:rgba(26,23,20,.5);z-index:300;display:none;align-items:center;justify-content:center;}
+    .cov.open{display:flex;}
+    .cbox{background:var(--warm);padding:30px;width:340px;text-align:center;}
+    .cbox h3{font-size:15px;font-weight:700;margin-bottom:9px;}
+    .cbox p{font-size:13px;color:var(--stone);margin-bottom:20px;line-height:1.6;}
+    .cact{display:flex;gap:9px;justify-content:center;}
+
+    /* EDIT CAT MODAL */
+    .cat-modal{background:var(--warm);width:440px;max-width:95vw;}
+
+    /* DANGER */
+    .dz{border:1px solid #F5C8C2;padding:20px;background:#FFF8F7;}
+    .dz h4{color:var(--red);font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;}
+    .dz p{font-size:13px;color:var(--stone);margin-bottom:13px;}
+
+    /* TOAST */
+    #toast{position:fixed;bottom:26px;right:26px;background:var(--ink);color:var(--warm);padding:12px 20px;font-size:13px;font-weight:500;z-index:999;transform:translateY(14px);opacity:0;transition:all .3s;pointer-events:none;}
+    #toast.show{transform:translateY(0);opacity:1;}
+    #toast.ok{background:var(--green);}
+    #toast.err{background:var(--red);}
+
+    /* EMOJI PICKER HELPER */
+    .emoji-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .emoji-btn{font-size:18px;padding:4px 6px;background:var(--cream);border:1px solid var(--soft);cursor:pointer;transition:all .15s;border-radius:2px;}
+    .emoji-btn:hover{background:var(--butter-light);border-color:var(--butter);}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="ls">
+  <div class="lbox">
+    <div class="llogo">BRICK <span class="amp">&</span> BUTTER<span class="sub">BAKEHOUSE</span></div>
+    <p class="lsub">Admin Panel</p>
+    <input class="linput" type="password" id="pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()"/>
+    <button class="lbtn" id="lbtn" onclick="login()">Sign In</button>
+    <p class="lerr" id="lerr">Incorrect password.</p>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div id="sh">
+  <div class="sb">
+    <div class="sbb">
+      <div class="sbn">BRICK <span class="amp">&</span> BUTTER<span class="s">BAKEHOUSE</span></div>
+      <div class="sbadge">Admin Panel</div>
+      <div class="sbst"><div class="dot" id="dbdot"></div><span id="dbst">Connecting…</span></div>
+    </div>
+    <nav class="sbnav">
+      <div class="nsl">Manage</div>
+      <div class="ni active" onclick="go('site',this)"><span class="ico">🏠</span>Site Info</div>
+      <div class="ni" onclick="go('cats',this)"><span class="ico">📂</span>Categories</div>
+      <div class="ni" onclick="go('menu',this)"><span class="ico">🥐</span>Menu Items</div>
+      <div class="nsl">System</div>
+      <div class="ni" onclick="go('settings',this)"><span class="ico">⚙️</span>Settings</div>
+    </nav>
+    <div class="sbbot">
+      <a class="sbl" href="index.html" target="_blank"><span>↗</span> View Website</a>
+      <div class="sbl" onclick="logout()"><span>→</span> Sign Out</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ── SITE INFO ── -->
+    <div class="sec active" id="sec-site">
+      <div class="topbar">
+        <div class="tl"><div class="ttl">Site Info</div><div class="tsub">Business details shown on the website</div></div>
+        <div class="tr"><button class="btn bp" id="save-site-btn" onclick="saveSite()">💾 Save Changes</button></div>
+      </div>
+      <div class="card">
+        <div class="ct">📍 Address & Contact</div>
+        <div class="fg2">
+          <div class="fg"><label>Address Line 1</label><input type="text" id="si-a1" placeholder="28 Finch Ave W #116"/></div>
+          <div class="fg"><label>Address Line 2</label><input type="text" id="si-a2" placeholder="North York, ON M2N 2G7"/></div>
+          <div class="fg"><label>Phone Number</label><input type="text" id="si-ph" placeholder="(416) 223-8916"/></div>
+          <div class="fg"><label>Transit Info</label><input type="text" id="si-tr" placeholder="5 min walk from Finch TTC Station"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">🕐 Opening Hours</div>
+        <div class="hr"><div class="hrd">Mon – Fri</div><input type="text" id="si-wo" placeholder="8:00 AM"/><div class="hrsp">–</div><input type="text" id="si-wc" placeholder="8:00 PM"/></div>
+        <div class="hr"><div class="hrd">Saturday</div><input type="text" id="si-so" placeholder="9:00 AM"/><div class="hrsp">–</div><input type="text" id="si-sc" placeholder="8:00 PM"/></div>
+        <div class="hr"><div class="hrd">Sunday</div><input type="text" id="si-no" placeholder="9:00 AM"/><div class="hrsp">–</div><input type="text" id="si-nc" placeholder="7:00 PM"/></div>
+      </div>
+      <div class="card">
+        <div class="ct">🔗 Links</div>
+        <div class="fg1">
+          <div class="fg"><label>Uber Eats URL</label><input type="url" id="si-ub" placeholder="https://www.ubereats.com/..."/></div>
+          <div class="fg"><label>Instagram URL</label><input type="url" id="si-ig" placeholder="https://www.instagram.com/..."/></div>
+        </div>
+      </div>
+      <div class="fa">
+        <button class="btn bp" onclick="saveSite()">💾 Save All Changes</button>
+        <div class="saved" id="site-saved">✅ Saved to Supabase!</div>
+      </div>
+    </div>
+
+    <!-- ── CATEGORIES ── -->
+    <div class="sec" id="sec-cats">
+      <div class="topbar">
+        <div class="tl"><div class="ttl">Categories</div><div class="tsub">Add, rename, reorder or delete menu sections</div></div>
+        <div class="tr"><button class="btn bp" onclick="openAddCat()">+ New Category</button></div>
+      </div>
+
+      <div class="card">
+        <div class="ct"><span>All Categories</span><span id="cat-count-lbl" style="font-size:11px;color:var(--stone);font-weight:400;letter-spacing:.05em;"></span></div>
+        <div class="cat-manager" id="cat-manager"></div>
+        <p style="font-size:12px;color:var(--stone);margin-top:12px;">
+          ⚠️ Kateqoriyanı silsəniz, həmin kateqoriyadakı bütün menyu itemləri də silinəcək.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── MENU ITEMS ── -->
+    <div class="sec" id="sec-menu">
+      <div class="topbar">
+        <div class="tl"><div class="ttl">Menu Items</div><div class="tsub" id="menu-sub">Loading…</div></div>
+        <div class="tr"><button class="btn bp" onclick="openAddItem()">+ Add Item</button></div>
+      </div>
+      <div class="card" style="padding-bottom:16px;">
+        <div class="ct">All Items</div>
+        <div class="cat-tabs" id="cat-tabs"></div>
+        <div id="ilist"></div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="sec" id="sec-settings">
+      <div class="topbar"><div class="tl"><div class="ttl">Settings</div></div></div>
+      <div class="card">
+        <div class="ct">🔑 Change Password</div>
+        <div class="fg2" style="max-width:460px;">
+          <div class="fg"><label>Current Password</label><input type="password" id="pc"/></div>
+          <div class="fg"><label>New Password</label><input type="password" id="pn"/></div>
+          <div class="fg full"><label>Confirm New Password</label><input type="password" id="pcf"/></div>
+        </div>
+        <div class="fa"><button class="btn bp" onclick="chgPw()">Update Password</button><div class="saved" id="pw-saved">✅ Updated!</div></div>
+      </div>
+      <div class="card">
+        <div class="ct" style="color:var(--red);">⚠️ Danger Zone</div>
+        <div class="dz">
+          <h4>Delete All Menu Items</h4>
+          <p>Supabase-dəki bütün menyu itemlərini sil. Geri qaytarıla bilməz.</p>
+          <button class="btn bd" onclick="confirm2('Delete ALL menu items?','Every item will be removed permanently.',clearAllItems)">Delete All Items</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT ITEM MODAL -->
+<div class="ov" id="item-ov">
+  <div class="modal">
+    <div class="mhd"><h3 id="item-mtitle">Add Item</h3><button class="mx" onclick="closeItemModal()">✕</button></div>
+    <div class="mbody">
+      <div class="fg1" style="gap:13px;">
+        <div class="fg"><label>Category</label><select id="item-cat" style="width:100%;"></select></div>
+        <div class="fg"><label>Item Name *</label><input type="text" id="item-name" placeholder="e.g. Almond Croissant"/></div>
+        <div class="fg"><label>Description *</label><textarea id="item-desc" placeholder="Describe this item…"></textarea></div>
+        <div class="fg4">
+          <div class="fg"><label>Price</label><input type="text" id="item-price" placeholder="$9.50"/></div>
+          <div class="fg"><label>Size</label><input type="text" id="item-size" placeholder='4"'/></div>
+          <div class="fg"><label>Tag / Badge</label><input type="text" id="item-tag" placeholder="Popular"/></div>
+          <div class="fg"><label>Sort Order</label><input type="text" id="item-ord" placeholder="1"/></div>
+        </div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bs" onclick="closeItemModal()">Cancel</button>
+      <button class="btn bp" id="item-save-btn" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CATEGORY MODAL -->
+<div class="ov" id="cat-ov">
+  <div class="modal cat-modal">
+    <div class="mhd"><h3 id="cat-mtitle">New Category</h3><button class="mx" onclick="closeCatModal()">✕</button></div>
+    <div class="mbody">
+      <div class="fg1" style="gap:14px;">
+        <div class="fg">
+          <label>Emoji / Icon</label>
+          <input type="text" id="cat-emoji" placeholder="🥐" maxlength="4" style="width:80px;font-size:22px;text-align:center;"/>
+          <div class="emoji-row" id="emoji-row"></div>
+        </div>
+        <div class="fg">
+          <label>Display Name *</label>
+          <input type="text" id="cat-label" placeholder="e.g. Croissants"/>
+        </div>
+        <div class="fg">
+          <label>Slug / Key * <span style="font-weight:400;opacity:.6;">(lowercase, no spaces — used internally)</span></label>
+          <input type="text" id="cat-key" placeholder="e.g. croissants"/>
+          <span style="font-size:11px;color:var(--stone);margin-top:3px;">Artıq mövcud kateqoriyanı redaktə etsəniz, key dəyişməyin.</span>
+        </div>
+        <div class="fg">
+          <label>Sort Order</label>
+          <input type="text" id="cat-ord" placeholder="1"/>
+        </div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bs" onclick="closeCatModal()">Cancel</button>
+      <button class="btn bp" id="cat-save-btn" onclick="saveCat()">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="cov" id="cov">
+  <div class="cbox">
+    <h3 id="cf-t">Are you sure?</h3>
+    <p id="cf-m"></p>
+    <div class="cact"><button class="btn bs" onclick="closeCov()">Cancel</button><button class="btn bd" id="cf-ok">Confirm</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  SUPABASE
+// ══════════════════════════════════════════
+const SB  = 'https://whmyxfobnqnhszhnnmib.supabase.co';
+const KEY = 'sb_publishable_Vyy7sK68_v4EYeg0poFcIg_cCn1qkbS';
+const H   = { 'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=representation' };
+
+async function db(method, path, body) {
+  const r = await fetch(`${SB}/rest/v1/${path}`, { method, headers:H, body:body?JSON.stringify(body):undefined });
+  if (!r.ok) throw new Error((await r.text())||`HTTP ${r.status}`);
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let categories = [];   // [{id,key,label,sort_order}]
+let menuData   = {};   // {key: [items]}
+let activeCat  = '';
+let editItemId = null;
+let editCatId  = null;
+
+const getPw = () => localStorage.getItem('bnb_pw')||'admin123';
+const EMOJIS = ['🥐','🍰','🎂','🧁','☕','🍵','🧃','🍫','🍓','🥗','🍞','🥖','🫐','🍪','🧆','🥛','🍩','🍦','🍮','🍜'];
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+async function login() {
+  if (document.getElementById('pw').value !== getPw()) {
+    document.getElementById('lerr').style.display='block';
+    document.getElementById('pw').value=''; return;
+  }
+  const b=document.getElementById('lbtn');
+  b.innerHTML='<span class="spin"></span> Connecting…'; b.disabled=true;
+  try {
+    await db('GET','site_info?select=id&limit=1');
+    localStorage.setItem('bnb_auth','1');
+    document.getElementById('ls').style.display='none';
+    document.getElementById('sh').style.display='flex';
+    setDB(true); init();
+  } catch(e) {
+    toast('❌ Cannot connect to Supabase','err');
+    setDB(false); b.innerHTML='Sign In'; b.disabled=false;
+  }
+}
+
+function logout(){ localStorage.removeItem('bnb_auth'); location.reload(); }
+function setDB(ok){
+  document.getElementById('dbdot').className='dot'+(ok?' on':'');
+  document.getElementById('dbst').textContent=ok?'Supabase connected':'Connection failed';
+}
+
+window.addEventListener('DOMContentLoaded',async()=>{
+  if(localStorage.getItem('bnb_auth')==='1'){
+    document.getElementById('ls').style.display='none';
+    document.getElementById('sh').style.display='flex';
+    try{ await db('GET','site_info?select=id&limit=1'); setDB(true); init(); }
+    catch{ setDB(false); toast('⚠️ Database unreachable','err'); }
+  }
+});
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+async function init(){ await loadSite(); await loadCats(); await loadMenu(); }
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function go(name,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  SITE INFO
+// ══════════════════════════════════════════
+async function loadSite(){
+  try{
+    const r=await db('GET','site_info?id=eq.1&select=*');
+    if(!r?.length) return;
+    const s=r[0];
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
+    set('si-a1',s.address1); set('si-a2',s.address2);
+    set('si-ph',s.phone);    set('si-tr',s.transit);
+    set('si-wo',s.wk_open);  set('si-wc',s.wk_close);
+    set('si-so',s.sat_open); set('si-sc',s.sat_close);
+    set('si-no',s.sun_open); set('si-nc',s.sun_close);
+    set('si-ub',s.ubereats); set('si-ig',s.instagram);
+  }catch{ toast('Failed to load site info','err'); }
+}
+
+async function saveSite(){
+  const b=document.getElementById('save-site-btn');
+  b.innerHTML='<span class="spin"></span> Saving…'; b.disabled=true;
+  const g=id=>document.getElementById(id)?.value.trim()||'';
+  try{
+    await db('PATCH','site_info?id=eq.1',{
+      address1:g('si-a1'),address2:g('si-a2'),phone:g('si-ph'),transit:g('si-tr'),
+      wk_open:g('si-wo'),wk_close:g('si-wc'),sat_open:g('si-so'),sat_close:g('si-sc'),
+      sun_open:g('si-no'),sun_close:g('si-nc'),ubereats:g('si-ub'),instagram:g('si-ig'),
+      updated_at:new Date().toISOString()
+    });
+    toast('✅ Site info saved!','ok'); flash('site-saved');
+  }catch(e){ toast('❌ '+e.message,'err'); }
+  b.innerHTML='💾 Save Changes'; b.disabled=false;
+}
+
+// ══════════════════════════════════════════
+//  CATEGORIES
+// ══════════════════════════════════════════
+async function loadCats(){
+  try{
+    const rows=await db('GET','menu_categories?select=*&order=sort_order.asc,created_at.asc');
+    categories=rows||[];
+    renderCats();
+    populateCatDropdown();
+  }catch(e){ toast('Failed to load categories','err'); }
+}
+
+function renderCats(){
+  const el=document.getElementById('cat-manager');
+  const lbl=document.getElementById('cat-count-lbl');
+  if(lbl) lbl.textContent=`${categories.length} categories`;
+  if(!categories.length){
+    el.innerHTML='<div class="no-cats">No categories yet. Add one above.</div>'; return;
+  }
+  el.innerHTML='';
+  categories.forEach(cat=>{
+    const itemCount=(menuData[cat.key]||[]).length;
+    const row=document.createElement('div');
+    row.className='cat-row'; row.dataset.id=cat.id; row.dataset.key=cat.key;
+    row.draggable=true;
+    row.innerHTML=`
+      <div class="drag-handle" title="Drag to reorder">⠿</div>
+      <div class="cat-label-wrap">
+        <div class="cat-emoji-badge">${getCatEmoji(cat.label)}</div>
+        <div class="cat-name">
+          ${getCatName(cat.label)}
+          <span class="cat-key">${cat.key}</span>
+        </div>
+      </div>
+      <div class="cat-count">${itemCount} item${itemCount!==1?'s':''}</div>
+      <div class="cat-acts">
+        <button class="btn bs bsm" onclick="openEditCat('${cat.id}')">✏️ Edit</button>
+        <button class="btn bd bsm" onclick="deleteCat('${cat.id}','${cat.key}','${escQ(getCatName(cat.label))}')">🗑</button>
+      </div>`;
+    setupDrag(row);
+    el.appendChild(row);
+  });
+}
+
+// Drag & drop reorder
+let dragSrc=null;
+function setupDrag(row){
+  row.addEventListener('dragstart',e=>{ dragSrc=row; row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+  row.addEventListener('dragend',()=>{ row.classList.remove('dragging'); document.querySelectorAll('.cat-row').forEach(r=>r.classList.remove('drag-over')); });
+  row.addEventListener('dragover',e=>{ e.preventDefault(); if(dragSrc!==row) row.classList.add('drag-over'); });
+  row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+  row.addEventListener('drop',async e=>{
+    e.preventDefault(); row.classList.remove('drag-over');
+    if(!dragSrc||dragSrc===row) return;
+    // Reorder in array
+    const fromId=dragSrc.dataset.id, toId=row.dataset.id;
+    const fromIdx=categories.findIndex(c=>c.id===fromId);
+    const toIdx=categories.findIndex(c=>c.id===toId);
+    const [moved]=categories.splice(fromIdx,1);
+    categories.splice(toIdx,0,moved);
+    // Update sort_order in DB
+    await saveOrder();
+    renderCats();
+  });
+}
+
+async function saveOrder(){
+  try{
+    for(let i=0;i<categories.length;i++){
+      await db('PATCH',`menu_categories?id=eq.${categories[i].id}`,{sort_order:i+1});
+    }
+  }catch{ toast('Failed to save order','err'); }
+}
+
+function getCatEmoji(label){ const m=label.match(/^([\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]|\p{Emoji_Presentation})/u); return m?m[0]:'📂'; }
+function getCatName(label){ return label.replace(/^([\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]|\p{Emoji_Presentation}|\s)+/u,'').trim(); }
+function escQ(s){ return s.replace(/'/g,"\\'"); }
+
+function populateCatDropdown(){
+  const sel=document.getElementById('item-cat');
+  if(!sel) return;
+  sel.innerHTML='';
+  categories.forEach(cat=>{
+    const o=document.createElement('option');
+    o.value=cat.key;
+    o.textContent=cat.label;
+    sel.appendChild(o);
+  });
+}
+
+// ── ADD CATEGORY ──
+function openAddCat(){
+  editCatId=null;
+  document.getElementById('cat-mtitle').textContent='New Category';
+  document.getElementById('cat-emoji').value='';
+  document.getElementById('cat-label').value='';
+  document.getElementById('cat-key').value='';
+  document.getElementById('cat-ord').value=String(categories.length+1);
+  renderEmojiPicker();
+  document.getElementById('cat-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('cat-emoji').focus(),80);
+
+  // Auto-fill slug from label
+  const li=document.getElementById('cat-label');
+  const ki=document.getElementById('cat-key');
+  li.oninput=()=>{
+    if(!editCatId){
+      ki.value=li.value.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+    }
+  };
+}
+
+function openEditCat(id){
+  const cat=categories.find(c=>c.id===id); if(!cat) return;
+  editCatId=id;
+  document.getElementById('cat-mtitle').textContent='Edit Category';
+  document.getElementById('cat-emoji').value=getCatEmoji(cat.label);
+  document.getElementById('cat-label').value=getCatName(cat.label);
+  document.getElementById('cat-key').value=cat.key;
+  document.getElementById('cat-ord').value=String(cat.sort_order||'');
+  renderEmojiPicker();
+  document.getElementById('cat-ov').classList.add('open');
+  document.getElementById('cat-label').oninput=null; // lock slug when editing
+}
+
+function closeCatModal(){ document.getElementById('cat-ov').classList.remove('open'); editCatId=null; }
+
+function renderEmojiPicker(){
+  const el=document.getElementById('emoji-row');
+  el.innerHTML='';
+  EMOJIS.forEach(em=>{
+    const b=document.createElement('button');
+    b.className='emoji-btn'; b.type='button'; b.textContent=em;
+    b.onclick=()=>{
+      document.getElementById('cat-emoji').value=em;
+    };
+    el.appendChild(b);
+  });
+}
+
+async function saveCat(){
+  const emoji=document.getElementById('cat-emoji').value.trim();
+  const name=document.getElementById('cat-label').value.trim();
+  const key=document.getElementById('cat-key').value.trim().toLowerCase().replace(/\s+/g,'_');
+  const ord=parseInt(document.getElementById('cat-ord').value)||categories.length+1;
+  if(!name){ toast('❌ Display name required','err'); return; }
+  if(!key){  toast('❌ Key/slug required','err'); return; }
+
+  const fullLabel=(emoji?emoji+' ':'')+name;
+  const b=document.getElementById('cat-save-btn');
+  b.innerHTML='<span class="spin"></span>'; b.disabled=true;
+
+  try{
+    if(editCatId){
+      await db('PATCH',`menu_categories?id=eq.${editCatId}`,{label:fullLabel,sort_order:ord});
+      toast('✅ Category updated!','ok');
+    }else{
+      await db('POST','menu_categories',{key,label:fullLabel,sort_order:ord});
+      toast('✅ Category added!','ok');
+    }
+    closeCatModal();
+    await loadCats();
+    await loadMenu();
+  }catch(e){ toast('❌ '+e.message,'err'); }
+  b.innerHTML='Save Category'; b.disabled=false;
+}
+
+async function deleteCat(id,key,name){
+  confirm2(
+    `Delete "${name}"?`,
+    `"${name}" kateqoriyası və içindəki bütün menyu itemləri silinəcək. Geri qaytarıla bilməz.`,
+    async()=>{
+      try{
+        await db('DELETE',`menu_items?category=eq.${key}`);
+        await db('DELETE',`menu_categories?id=eq.${id}`);
+        toast('🗑 Category deleted.','ok');
+        await loadCats();
+        await loadMenu();
+      }catch(e){ toast('❌ '+e.message,'err'); }
+    }
+  );
+}
+
+// ══════════════════════════════════════════
+//  MENU ITEMS
+// ══════════════════════════════════════════
+async function loadMenu(){
+  document.getElementById('ilist').innerHTML=[1,2,3,4].map(()=>`<div class="skel"></div>`).join('');
+  try{
+    const items=await db('GET','menu_items?select=*&order=category,sort_order.asc,created_at.asc');
+    menuData={};
+    categories.forEach(c=>menuData[c.key]=[]);
+    (items||[]).forEach(it=>{ if(menuData[it.category]!==undefined) menuData[it.category].push(it); else{ menuData[it.category]=menuData[it.category]||[]; menuData[it.category].push(it); } });
+    const total=(items||[]).length;
+    document.getElementById('menu-sub').textContent=`${total} items across ${categories.length} categories`;
+    if(!activeCat && categories.length) activeCat=categories[0].key;
+    renderMenuTabs();
+    renderMenuItems();
+    renderCats(); // refresh counts
+  }catch(e){
+    document.getElementById('ilist').innerHTML=`<div class="empty">❌ ${e.message}</div>`;
+  }
+}
+
+function renderMenuTabs(){
+  const el=document.getElementById('cat-tabs');
+  el.innerHTML='';
+  categories.forEach(cat=>{
+    const cnt=(menuData[cat.key]||[]).length;
+    const b=document.createElement('button');
+    b.className='ctab'+(cat.key===activeCat?' active':'');
+    b.innerHTML=`${cat.label}<span class="cnt">${cnt}</span>`;
+    b.onclick=()=>{ activeCat=cat.key; renderMenuTabs(); renderMenuItems(); };
+    el.appendChild(b);
+  });
+}
+
+function renderMenuItems(){
+  const el=document.getElementById('ilist');
+  const items=menuData[activeCat]||[];
+  if(!items.length){ el.innerHTML=`<div class="empty">No items here. Click "+ Add Item".</div>`; return; }
+  el.innerHTML='';
+  items.forEach((item,i)=>{
+    const row=document.createElement('div'); row.className='irow';
+    row.innerHTML=`
+      <div class="inum">${String(i+1).padStart(2,'0')}</div>
+      <div class="iname">${item.name}${item.size?` <span style="color:var(--stone);font-size:12px;">${item.size}</span>`:''}
+        <div class="idesc">${item.description}</div></div>
+      <div>${item.tag?`<span class="itag">${item.tag}</span>`:`<span style="color:var(--soft);">—</span>`}</div>
+      <div class="iprice">${item.price||`<span style="color:var(--soft);">—</span>`}</div>
+      <div class="iact">
+        <button class="btn bs bsm" onclick="openEditItem('${item.id}')">✏️ Edit</button>
+        <button class="btn bd bsm" onclick="delItem('${item.id}','${escQ(item.name)}')">🗑</button>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+// ── ADD / EDIT ITEM ──
+function openAddItem(){
+  editItemId=null;
+  document.getElementById('item-mtitle').textContent='Add Menu Item';
+  document.getElementById('item-cat').value=activeCat;
+  ['item-name','item-desc','item-price','item-size','item-tag','item-ord'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('item-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('item-name').focus(),80);
+}
+
+function openEditItem(id){
+  let found=null;
+  Object.values(menuData).forEach(arr=>{ const f=arr.find(i=>i.id===id); if(f) found=f; });
+  if(!found) return;
+  editItemId=id;
+  document.getElementById('item-mtitle').textContent='Edit Item';
+  document.getElementById('item-cat').value=found.category;
+  document.getElementById('item-name').value=found.name||'';
+  document.getElementById('item-desc').value=found.description||'';
+  document.getElementById('item-price').value=found.price||'';
+  document.getElementById('item-size').value=found.size||'';
+  document.getElementById('item-tag').value=found.tag||'';
+  document.getElementById('item-ord').value=found.sort_order||'';
+  document.getElementById('item-ov').classList.add('open');
+}
+
+function closeItemModal(){ document.getElementById('item-ov').classList.remove('open'); editItemId=null; }
+
+async function saveItem(){
+  const name=document.getElementById('item-name').value.trim();
+  const desc=document.getElementById('item-desc').value.trim();
+  if(!name){ toast('❌ Name required','err'); return; }
+  if(!desc){ toast('❌ Description required','err'); return; }
+  const b=document.getElementById('item-save-btn');
+  b.innerHTML='<span class="spin"></span>'; b.disabled=true;
+  const payload={
+    category:document.getElementById('item-cat').value,
+    name, description:desc,
+    price:document.getElementById('item-price').value.trim(),
+    size:document.getElementById('item-size').value.trim(),
+    tag:document.getElementById('item-tag').value.trim(),
+    sort_order:parseInt(document.getElementById('item-ord').value)||0,
+    updated_at:new Date().toISOString()
+  };
+  try{
+    if(editItemId){ await db('PATCH',`menu_items?id=eq.${editItemId}`,payload); toast('✅ Item updated!','ok'); }
+    else           { await db('POST','menu_items',payload); activeCat=payload.category; toast('✅ Item added!','ok'); }
+    closeItemModal(); await loadMenu();
+  }catch(e){ toast('❌ '+e.message,'err'); }
+  b.innerHTML='Save Item'; b.disabled=false;
+}
+
+async function delItem(id,name){
+  confirm2(`Delete "${name}"?`,'This item will be permanently removed.',async()=>{
+    try{ await db('DELETE',`menu_items?id=eq.${id}`); toast('🗑 Deleted.','ok'); await loadMenu(); }
+    catch{ toast('❌ Delete failed','err'); }
+  });
+}
+
+async function clearAllItems(){
+  try{ await db('DELETE','menu_items?sort_order=gte.-999999'); toast('♻️ All items deleted.','ok'); await loadMenu(); }
+  catch(e){ toast('❌ '+e.message,'err'); }
+}
+
+// ══════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════
+function chgPw(){
+  const c=document.getElementById('pc').value, n=document.getElementById('pn').value, cf=document.getElementById('pcf').value;
+  if(c!==getPw()){ toast('❌ Current password wrong','err'); return; }
+  if(!n||n.length<4){ toast('❌ Min 4 characters','err'); return; }
+  if(n!==cf){ toast('❌ Passwords do not match','err'); return; }
+  localStorage.setItem('bnb_pw',n);
+  ['pc','pn','pcf'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Password updated!','ok'); flash('pw-saved');
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function confirm2(t,m,cb){
+  document.getElementById('cf-t').textContent=t;
+  document.getElementById('cf-m').textContent=m;
+  document.getElementById('cf-ok').onclick=()=>{ closeCov(); cb(); };
+  document.getElementById('cov').classList.add('open');
+}
+function closeCov(){ document.getElementById('cov').classList.remove('open'); }
+
+let _tt;
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show'+(type?' '+type:'');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.className='',3200);
+}
+function flash(id){ const el=document.getElementById(id); if(!el) return; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3500); }
+
+// Close modals on backdrop
+['item-ov','cat-ov','cov'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this){ if(id==='item-ov') closeItemModal(); else if(id==='cat-ov') closeCatModal(); else closeCov(); } });
+});
+</script>
+</body>
+</html>
